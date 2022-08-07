@@ -22,16 +22,28 @@
                 }
             }
         }
+        var appContent = {
+            template: '<button v-on:click="addNumber">add</button>',
+            methods: {
+                addNumber: function() {
+                    this.$emit();
+                }
+            }
+        }
 
         new Vue({
             el: '#app',
             components: {
-                'app-header': appHeader
+                'app-header': appHeader,
+                'app-content': appContent
             },
             methods: {
                 logText: function() {
                     console.log('hi');
                 }
+            },
+            data: {
+                num: 10
             }
         });
     </script>
