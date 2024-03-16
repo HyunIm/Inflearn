@@ -1,4 +1,4 @@
-package com.example.SpringBatchTutorial.job;
+package com.example.SpringBatchTutorial.job.HelloWorld;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * desc: tasklet을 활용하여 Hello World를 출력
- * run: --job.name=helloWorldJob
+ * run: --job.names=helloWorldJob
  */
 @Configuration
 @RequiredArgsConstructor
