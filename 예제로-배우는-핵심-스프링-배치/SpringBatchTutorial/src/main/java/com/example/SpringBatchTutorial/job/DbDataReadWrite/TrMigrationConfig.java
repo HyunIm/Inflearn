@@ -16,9 +16,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemReader;
-import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
-import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,37 +57,40 @@ public class TrMigrationConfig {
     @JobScope
     @Bean
     public Step trMigrationStep(
-            ItemReader trOrderReader,
+            ItemReader trOrdersReader,
             ItemProcessor trOrderProcessor,
-            ItemWriter trOrderIWriter) {
+            ItemWriter trOrdersWriter) {
+
         return stepBuilderFactory.get("trMigrationStep")
                 .<Orders, Accounts>chunk(5)
-                .reader(trOrderReader)
+                .reader(trOrdersReader)
 //                .writer(new ItemWriter() {
 //                    @Override
-//                    public void write(List list) throws Exception {
-//                        list.forEach(System.out::println);
+//                    public void write(List items) throws Exception {
+//                        items.forEach(System.out::println);
 //                    }
 //                })
                 .processor(trOrderProcessor)
-                .writer(trOrderIWriter)
+                .writer(trOrdersWriter)
                 .build();
     }
 
 //    @StepScope
 //    @Bean
-//    public RepositoryItemWriter<Accounts> trOrderIWriter() {
+//    public RepositoryItemWriter<Accounts> trOrdersWriter() {
 //        return new RepositoryItemWriterBuilder<Accounts>()
 //                .repository(accountsRepository)
 //                .methodName("save")
 //                .build();
 //    }
 
-    public ItemWriter<Accounts> trOrderIWriter() {
+    @StepScope
+    @Bean
+    public ItemWriter<Accounts> trOrdersWriter() {
         return new ItemWriter<Accounts>() {
             @Override
-            public void write(List<? extends Accounts> list) throws Exception {
-                list.forEach(item -> accountsRepository.save(item));
+            public void write(List<? extends Accounts> items) throws Exception {
+                items.forEach(item -> accountsRepository.save(item));
             }
         };
     }
@@ -99,17 +100,17 @@ public class TrMigrationConfig {
     public ItemProcessor<Orders, Accounts> trOrderProcessor() {
         return new ItemProcessor<Orders, Accounts>() {
             @Override
-            public Accounts process(Orders orders) throws Exception {
-                 return new Accounts(orders);
+            public Accounts process(Orders item) throws Exception {
+                return new Accounts(item);
             }
         };
     }
 
     @StepScope
     @Bean
-    public RepositoryItemReader<Orders> trOrderReader() {
+    public RepositoryItemReader<Orders> trOrdersReader() {
         return new RepositoryItemReaderBuilder<Orders>()
-                .name("trOrderReader")
+                .name("trOrdersReader")
                 .repository(ordersRepository)
                 .methodName("findAll")
                 .pageSize(5)
